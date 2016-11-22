@@ -6,4 +6,5 @@
 *.tmproj
 *.log
 .env
+venv
 tmp
