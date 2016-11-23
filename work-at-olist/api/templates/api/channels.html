@@ -1,0 +1,13 @@
+{% extends 'api/base.html' %}
+{% block content %}
+  <h1>Channels:</h1>
+  <table>
+    {% for channel in channels %}
+    <tr>
+      <td>
+        {{ channel.name }}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock content %}
