@@ -20,6 +20,7 @@ class Node(models.Model):
     @property
     def parent_name(self):
         """
+        Returns the parent node's name
         """
         return self.parent.name if isinstance(self.parent, Node) else 'root'
 
