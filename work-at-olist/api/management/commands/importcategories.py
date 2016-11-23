@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
-from rows import import_from_csv
 from ...models import Node
+from rows import import_from_csv
 
 
 class Command(BaseCommand):
@@ -24,7 +24,6 @@ class Command(BaseCommand):
         # Add to DB
         for category in data['category']:
             self.add_tree([channel]+category.split(' / '))
-        print(Node.objects.all())
 
     def add_tree(self, tree, parent=None):
         """

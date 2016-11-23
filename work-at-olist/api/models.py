@@ -16,6 +16,7 @@ class Node(models.Model):
 
     def __repr__(self):
         return self.tree
+    __str__  = __repr__
 
     @property
     def parent_name(self):
