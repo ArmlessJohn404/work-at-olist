@@ -6,113 +6,88 @@
       <a href="https://github.com/solidarium/work-at-olist">https://github.com/solidarium/work-at-olist</a>
     </p>
     <p>
-      The API queries a database of product categories of different channels like:
+      <h4><a href="/api/">Check it working here!</a></h4>
+      <h4><a href="https://github.com/ArmlessJohn404/work-at-olist">Check the repository</a></h4>
     </p>
-    <pre>
-  <b>walmart channel:</b>
-  Books
-  Books / National Literature
-  Books / National Literature / Science Fiction
-  Books / National Literature / Fiction Fantastic
-  Books / Foreign Literature
-  Books / Computers
-  Books / Computers / Applications
-  Books / Computers / Database
-  Books / Computers / Programming
-  Games
-  Games / XBOX 360
-  Games / XBOX 360 / Console
-  Games / XBOX 360 / Games
-  Games / XBOX 360 / Accessories
-  Games / XBOX One
-  Games / XBOX One / Console
-  Games / XBOX One / Games
-  Games / XBOX One / Accessories
-  Games / Playstation 4
-  Computers
-  Computers / Notebooks
-  Computers / Tablets
-  Computers / Desktop
-    </pre>
+    <p>
+      There's two main parts for this project:
+      <ul>
+        <li>Make a <em>Django Management Command</em> for importing data</li>
+        <li>Create a <em>REST API</em> that:</li>
+        <ul>
+          <li>List existing channels</li>
+          <li>List all categories and subcategories of a channel</li>
+          <li>Return a single category with their parent categories and functionalities</li>
+        </ul>
+      </ul>
+    </p>
+
     <br>
-
-    <h3>Web view:</h3>
     <p>
-      All the API requests have a web view associated using the query <code>preety</code> Try it!
+      This was my first project made with <code>Django</code> and I have learned a lot!
     </p>
     <p>
-      <code>{{ hosted }}api?preety&amp;</code><input class="input-group" id="query-in" type="text" name="name" value="channels" style="display: inline; width: 17em;">
-      <a href="#" class="btn btn-primary" onclick="query();">Go!</a>
+      I started by making an app called <code>api</code> that manages it all. Since I'm not very familiar with <code>Django</code>, I didn't tweaked the settings very much. I then rerouted requests to <code>http://host/api/</code> to the <code>api</code> app.
     </p>
-
-    <h3>Usage:</h3>
+    <h2>Creating the command</h2>
     <p>
-      Available <em>query strings</em>:
+      The command called <code>importcategories</code> should open a CSV file, get a column named <code>Categories</code> and parse it to the database.
     </p>
-    <pre>
-    ?channels
-    ?channel="&lt;channel name&gt;"
-    ?channel="&lt;channel name&gt;"&amp;category="&lt;category name&gt;"</pre>
     <p>
-      <li>You can query for all channels included in the database:
+      To add the <em>Django Management Command</em>, I foud out that it was necessary to create a file inside the package: <code>api/management/commands/importcategories.py</code> that provided the functionality.
     </p>
-    <code><a href="{{ hosted }}api?channels">{{ hosted }}api?channels</a></code>
-    <pre>{
-  "channels": ["walmart", "catTube", "amazon", "banana fingers", "english bagels"]
-}</pre>
-
     <p>
-      <li>You can query for all categories in a given channel:
+      Along with that, I had to setup a local DB to work with. I chose <code>PostgreSQL</code> because I knew in advance that <code>heroku</code> has a neat support for it.
     </p>
-    <code><a href="{{ hosted }}api?channel=catTube">{{ hosted }}api?channel=catTube</a></code>
-    <pre>{
-  "channel": "catTube",
-  "tree": ["Kittens", "Kittens / Siamese", "Dog"]
-}</pre>
-
     <p>
-      <li>Also, you can query for a given category in a channel:
+      Also, I created a basic tree data structure in <code>api/models.py</code> to handle the command. This structure I called <code>Node</code>, which has a <code>name</code> and a reference to a <code>parent</code> <code>Node</code>.
     </p>
-    <code><a href="{{ hosted }}api?channel=english bagels&amp;category=Books / National Literature / Science Fiction">{{ hosted }}api?channel=english bagels&amp;category=Books / National Literature / Science Fiction</a></code>
-    <pre>{
-  "channel": "english bagels",
-  "tree": ["Books / National Literature / Fiction Fantastic"],
-  "branch": "Books / National Literature / Science Fiction",
-  "category": "Science Fiction"
-}</pre>
-<code><a href="{{ hosted }}api?channel=english bagels&amp;category=Games">{{ hosted }}api?channel=english bagels&amp;category=Games</a></code>
-<pre>{
-"channel": "english bagels",
-"tree": [
-  "Games",
-  "Games / XBOX 360",
-  "Games / XBOX 360 / Console",
-  "Games / XBOX 360 / Games",
-  "Games / XBOX 360 / Accessories",
-  "Games / XBOX One",
-  "Games / XBOX One / Console",
-  "Games / XBOX One / Games",
-  "Games / XBOX One / Accessories",
-  "Games / Playstation 4",
-],
-"branch": "Games",
-"category": "Science Fiction"
-}</pre>
+    <p>
+      I don't know how the references to child nodes are stored, but if the computer doesn't need to look in the entire table this might be good enough. Otherwise it's possible to implement over the <a href="https://www.postgresql.org/docs/9.1/static/ltree.html">ltree</a> data structure or use something like the <a href="https://github.com/django-mptt/django-mptt">django-mptt</a>.
+    </p>
+    <p>
+      I considered the nodes at the root as the <code>Channels</code> and every tree below them as it's <code>Categories</code>. One thing that bothers me is that to find the channels it's necessary to look up in the entire table. This could be solved by creating another table and storing references to the starting node.
+    </p>
+    <p>
+      To parse the CSV I used a library called <a href="https://github.com/turicas/rows">rows</a>, from <a href="https://github.com/turicas/">turicas</a>, that allowed me to get the data in a single line. Then, with a recursive function the <code>Nodes</code> are created and stored in the database.
+    </p>
+    <h2>Creating the API</h2>
+    <p>
+      For the API I decided to use <em>string queries</em> in the URL to get the data. So I routed incoming queries to a function called <code>handle_queries</code>. It then parses the strings and choses an apropriate response. There's no much handling of the data in these views because the <code>Node</code> interface takes care of it.
+    </p>
+    <p>
+      The <code>Node</code> class had to be upgraded to support the required data. There were added two properties: <code>branch</code> that returns the entire branch of <code>Node</code> up to the root (not including the Channel), and <code>tree</code> that returns the entire tree of nodes below. Also a method called <code>find_category</code> that takes a string as argument and returns the <code>Node</code> associated with the category if it exists.
+    </p>
+    <p>
+      I also made some web views for the data by using the string <code>preety</code> in the request. It renders the json in a nice web page.
+    </p>
+    <h2>Testing</h2>
+    <p>
+      There were created 24 test cases:
+      <ul>
+        <li>7 for the `Node` API</li>
+        <li>7 for the `importcategories` command</li>
+        <li>5 for the `Web Views`</li>
+        <li>5 for the `API`</li>
+      </ul>
+    </p>
+    <h2>Documentation</h2>
+    <p>
+      The documentation can be found in the <a href="/api/">api</a> page
+    </p>
+    <h2>Deploying at Heroku</h2>
+    <p>
+      For the deployment, Heroku asks for a <code>Procfile</code> which is a starting point for the server and I had to setup the variables for the databases.
+    </p>
+    <h2>Conclusions</h2>
+    <p>
+      Well, it was quite a challenge to do this app, but fortunatelly I'm very conforable with <em>Python</em> and recently I've been sudying a lot of <em>Web</em>, specially playing at <a href="https://www.wechall.net/">WeChall</a>. I'ts funny that my latest projects were all in <code>Js</code> and this one has less than a dozen lines.
+    </p>
+    <p>
+      There's certainly room for improvement, I mentioned two here but there's always more. I'd say it's deliverable the way it is. After all, a software is never really <code>done</code>.
+    </p>
+    <p>
+      I hope that you consider kindly this application and I to hear from you soon.
+    </p>
   </div>
-  <style>
-    code a:link {
-      color: #c7254e;
-    }
-
-  </style>
-  <script type="text/javascript">
-    $("#query-in").keydown(function(e) {
-      if (e.which === 13)
-        query();
-    });
-
-    function query() {
-      window.location = "?preety&"+$("#query-in").val()
-    }
-  </script>
 {% endblock content %}

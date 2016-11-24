@@ -212,6 +212,7 @@ class ApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode("utf-8"), json)
 
+
     def test_channel(self):
         response = self.client.get("/api/?channel=parent")
         json = {
@@ -222,6 +223,10 @@ class ApiTests(TestCase):
             "channel": "parent"}
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode("utf-8"), json)
+
+    def test_channel_fail(self):
+        response = self.client.get("/api/?channel=fail")
+        self.assertEqual(response.status_code, 404)
 
     def test_category(self):
         response = self.client.get("/api/?channel=parent&category=node_name")
@@ -251,3 +256,9 @@ class ApiTests(TestCase):
         }
         self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(response.content.decode("utf-8"), json)
+
+    def test_category_fail(self):
+        response = self.client.get("/api/?channel=fail&category=node_name")
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get("/api/?channel=parent&category=fail")
+        self.assertEqual(response.status_code, 404)

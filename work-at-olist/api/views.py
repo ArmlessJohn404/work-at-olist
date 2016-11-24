@@ -8,7 +8,7 @@ from .models import Node
 
 def handle_query(request):
     if request.GET == {}:
-        return render(request, 'api/index.html')
+        return render(request, 'api/api.html')
     elif 'channels' in request.GET:
         return channels(request)
     elif 'channel' in request.GET and 'category' in request.GET:
@@ -18,8 +18,6 @@ def handle_query(request):
     elif 'channel' in request.GET:
         channel_name = request.GET.get('channel')
         return channel(request, channel_name)
-    elif 'preety' in request.GET:
-        redirect('/')
     else:
         raise Http404
 
@@ -30,9 +28,7 @@ def channels(request):
         return render(request, 'api/channels.html',
                       {'channels': response, 'title': 'channels'})
     else:
-        json = {'channels': []}
-        for channel in response:
-            json['channels'].append(channel.name)
+        json = {'channels': [channel.name for channel in response]}
         return JsonResponse(json)
 
 
@@ -64,3 +60,7 @@ def category(request, channel_name, category_name):
             return render(request, 'api/category.html', context)
         else:
             return JsonResponse(json)
+
+
+def root_view(request):
+    return render(request, 'api/index.html')
