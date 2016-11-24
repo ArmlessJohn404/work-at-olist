@@ -62,14 +62,20 @@ class Node(models.Model):
         self._tree(tree)
         return str("\n".join(tree)).strip()
 
+    def _find_category(self, category_list):
+        category_name = category_list.pop(0)
+        for new_node in self.node_set.all():
+            if new_node.name == category_name:
+                if category_list:
+                    return new_node._find_category(category_list)
+                else:
+                    return new_node
+        else:
+            return
+
     def find_category(self, category_name):
         """
         Returns the category `Node` inside the instance tree
         """
-        if self.name == category_name:
-            return self
-        else:
-            for new_node in self.node_set.all():
-                found = new_node.find_category(category_name)
-                if isinstance(found, Node):
-                    return found
+        category_list = category_name.split(" / ")
+        return self._find_category(category_list)

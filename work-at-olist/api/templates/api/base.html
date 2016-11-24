@@ -1,21 +1,40 @@
+{% with "https://let-me-work-at-olist.herokuapp.com/" as hosted %}
 <html>
   <head>
     <title>{{ title }}</title>
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script
+  src="https://code.jquery.com/jquery-3.1.1.slim.min.js"
+  integrity="sha256-/SIrNqv8h6QGKDuNoLGA4iret+kyesCkHGzVUUV0shc="
+  crossorigin="anonymous"></script>
   </head>
 
   <body>
     <div class="content container">
       <div class="page-header">
-        <h1><a href="/">Olist API</a></h1>
+        <h1><a href="/api/">Work at Olist API</a></h1>
       </div>
       <div class="row">
-        <div class="col-md-4 col-offset-4">
-          <h1>{{ title }}</h1>
+        <div class="col-md-6 col-md-offset-3">
           {% block content %}
           {% endblock content %}
+        </div>
+      </div>
+      <br>
+      <br>
+      <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+          <center>
+            <p>
+              Luiz Eduardo Amaral - Nov 2016
+            </p>
+            <p>
+              <a href="mailto:luizamaral306@gmail.com">&lt;luizamaral306@gmail.com&gt;</a>
+            </p>
+          </center>
         </div>
       </div>
     </div>
   </body>
 </html>
+{% endwith %}

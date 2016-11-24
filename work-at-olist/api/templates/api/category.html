@@ -1,12 +1,15 @@
 {% extends 'api/base.html' %}
 {% block content %}
-  <h2>channel: {{ channel }}</h2>
+  <h2>Channel:
+    <a href="?preety&amp;channel={{channel}}">{{ channel }}</a>
+  </h2>
+  <h3>Category: <a href="?preety&amp;channel={{channel}}&amp;category={{category}}">{{ category }}</a></h3>
   <h3>Subtree:</h3>
   <table id="subtree">
     {% for branch in tree %}
     <tr>
       <td>
-        {{ branch }}
+        <a href="?preety&amp;channel={{channel}}&amp;category={{branch}}">{{branch}}</a>
       </td>
     </tr>
     {% endfor %}
@@ -16,7 +19,7 @@
   <table id=branch>
     <tr>
       <td>
-        {{ branch }}
+        <a href="?preety&amp;channel={{channel}}&amp;category={{branch}}">{{branch}}</a>
       </td>
     </tr>
   </table>
