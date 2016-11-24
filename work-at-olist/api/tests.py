@@ -24,14 +24,32 @@ class NodeClassTests(TestCase):
         node = Node(name="node_name", parent=parent)
         self.assertIs(node.parent_name, parent.name)
 
-    def test_node_tree_method(self):
-        parent = Node(name="parent")
+    def test_node_branch_method(self):
+        parent = Node(name="parent", parent=None)
         node = Node(name="node_name", parent=parent)
         bro_node = Node(name="bro_node_name", parent=parent)
-        sub_node = Node(name="sub_node_name", parent=node)
-        bro_sub_node = Node(name="bro_sub_node_name", parent=node)
-        tree = "{0} / {1} / {2}".format(parent.name, node.name, sub_node.name)
-        self.assertEquals(sub_node.tree, tree)
+        s_node = Node(name="s_node_name", parent=node)
+        bro_s_node = Node(name="bro_s_node_name", parent=node)
+        branch = "{0} / {1} / {2}".format(parent.name, node.name, s_node.name)
+        self.assertEquals(s_node.branch, branch)
+
+    def test_node_tree_method(self):
+        parent = Node(name="parent", parent=None)
+        parent.save()
+        node = Node(name="node_name", parent=parent)
+        node.save()
+        bro_node = Node(name="bro_node_name", parent=parent)
+        bro_node.save()
+        s_node = Node(name="s_node_name", parent=node)
+        s_node.save()
+        bro_s_node = Node(name="bro_s_node_name", parent=node)
+        bro_s_node.save()
+        node_tree = ("node_name\n"
+                     "node_name / s_node_name\n"
+                     "node_name / bro_s_node_name")
+        parent_tree = node_tree + "\nbro_node_name"
+        self.assertEquals(parent.tree, parent_tree)
+        self.assertEquals(node.tree, node_tree)
 
 
 class ImportcategoriesCommandTests(TestCase):
@@ -58,7 +76,7 @@ class ImportcategoriesCommandTests(TestCase):
     def test_importcategories_with_one_argument(self):
         self.raise_importcategories(["kitten"])
 
-    def test_importcategories_tree_arguments(self):
+    def test_importcategories_three_arguments(self):
         self.raise_importcategories(["catTube", "kitten", "extra"])
 
     def test_importcategories_two_arguments(self):
