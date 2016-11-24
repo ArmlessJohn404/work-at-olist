@@ -18,8 +18,7 @@ class Command(BaseCommand):
         # Full update mode: Delete all channel's references
         # Just remove those lines if I misunderstood this
         if Node.objects.filter(name=channel, parent=None):
-            root = Node.objects.get(name=channel, parent=None)
-            self.del_tree(root)
+            Node.objects.get(name=channel, parent=None).delete()
 
         # Add to DB
         for category in data['category']:
@@ -41,11 +40,3 @@ class Command(BaseCommand):
             else:
                 new = Node.objects.get(name=current, parent=parent)
             self.add_tree(tree, new)
-
-    def del_tree(self, node):
-        """
-        Recursively deletes the tree
-        """
-        for branch in Node.objects.filter(parent=node):
-            self.del_tree(branch)
-        node.delete()
