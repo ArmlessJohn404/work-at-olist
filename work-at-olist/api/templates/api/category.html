@@ -1,0 +1,23 @@
+{% extends 'api/base.html' %}
+{% block content %}
+  <h2>channel: {{ channel }}</h2>
+  <h3>Subtree:</h3>
+  <table id="subtree">
+    {% for branch in tree %}
+    <tr>
+      <td>
+        {{ branch }}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h3>Branch:</h3>
+  <table id=branch>
+    <tr>
+      <td>
+        {{ branch }}
+      </td>
+    </tr>
+  </table>
+{% endblock content %}

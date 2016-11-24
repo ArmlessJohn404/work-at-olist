@@ -6,6 +6,7 @@ class Node(models.Model):
     Basic data structure for the database.
     Each node points to a parent in the tree. Those are the `categories`
     If the parent is `None`, then the node is at the `root` and is a `channel`
+    `root` nodes are not shown
     """
 
     name = models.CharField(max_length=50)
@@ -26,21 +27,29 @@ class Node(models.Model):
         """
         return self.parent.name if isinstance(self.parent, Node) else 'root'
 
+    def _branch(self):
+        """
+        Recursively gets the branch of the `Node`
+        """
+        if self.parent is not None:
+            return self.parent._branch()+" / "+self.name
+        else:
+            return self.name
+
     @property
     def branch(self):
         """
         Returns the entire branch abobe this Node up to the root
         """
-        if isinstance(self.parent, Node):
-            return self.parent.branch+" / "+self.name
-        return self.name
+        branch = self._branch()
+        return " / ".join(branch.split(" / ")[1:])
 
     def _tree(self, tree):
         """
         Recursively appends the `Node` to `tree` without the root (channel)
         """
         if self.parent is not None:
-            tree.append(" / ".join(self.branch.split(" / ")[1:]))
+            tree.append(self.branch)
         for branch in self.node_set.all():
             branch._tree(tree)
 
@@ -51,4 +60,16 @@ class Node(models.Model):
         """
         tree = []
         self._tree(tree)
-        return str("\n".join(tree))
+        return str("\n".join(tree)).strip()
+
+    def find_category(self, category_name):
+        """
+        Returns the category `Node` inside the instance tree
+        """
+        if self.name == category_name:
+            return self
+        else:
+            for new_node in self.node_set.all():
+                found = new_node.find_category(category_name)
+                if isinstance(found, Node):
+                    return found

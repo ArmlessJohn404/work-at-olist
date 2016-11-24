@@ -1,10 +1,10 @@
 {% extends 'api/base.html' %}
 {% block content %}
   <table>
-    {% for channel in channels %}
+    {% for branch in tree %}
     <tr>
       <td>
-        {{ channel.name }}
+        {{ branch }}
       </td>
     </tr>
     {% endfor %}

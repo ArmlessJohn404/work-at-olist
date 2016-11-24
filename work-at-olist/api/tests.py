@@ -30,7 +30,7 @@ class NodeClassTests(TestCase):
         bro_node = Node(name="bro_node_name", parent=parent)
         s_node = Node(name="s_node_name", parent=node)
         bro_s_node = Node(name="bro_s_node_name", parent=node)
-        branch = "{0} / {1} / {2}".format(parent.name, node.name, s_node.name)
+        branch = "{0} / {1}".format(node.name, s_node.name)
         self.assertEquals(s_node.branch, branch)
 
     def test_node_tree_method(self):
@@ -60,14 +60,14 @@ class ImportcategoriesCommandTests(TestCase):
 
     def get_database_str(self):
         db_str = ""
-        for node in Node.objects.all():
+        for node in Node.objects.all()[1:]:
             db_str += str(node)+"\n"
         return db_str
 
-    def get_file_str(self, filename, channel):
-        file_str = channel+"\n"
+    def get_file_str(self, filename):
+        file_str = ""
         for line in import_from_csv(filename)['category']:
-            file_str += "{0} / {1}\n".format(channel, line)
+            file_str += str(line+"\n")
         return file_str
 
     def test_importcategories_with_no_arguments(self):
@@ -89,7 +89,7 @@ class ImportcategoriesCommandTests(TestCase):
         channel = "catTube"
         call_command("importcategories", channel, TEST_FILE2)
         db_str = self.get_database_str()
-        file_str = self.get_file_str(TEST_FILE2, channel)
+        file_str = self.get_file_str(TEST_FILE2)
         self.assertEquals(db_str, file_str)
 
     def test_importcategories_does_full_update(self):
@@ -97,7 +97,7 @@ class ImportcategoriesCommandTests(TestCase):
         call_command("importcategories", channel, TEST_FILE1)
         call_command("importcategories", channel, TEST_FILE2)
         db_str = self.get_database_str()
-        file_str = self.get_file_str(TEST_FILE2, channel)
+        file_str = self.get_file_str(TEST_FILE2)
         self.assertEquals(db_str, file_str)
 
     def test_importcategories_on_two_channels(self):
@@ -106,7 +106,7 @@ class ImportcategoriesCommandTests(TestCase):
         channel2 = "british bagels"
         call_command("importcategories", channel2, TEST_FILE2)
         db_str = self.get_database_str()
-        file_str1 = self.get_file_str(TEST_FILE1, channel1)
-        file_str2 = self.get_file_str(TEST_FILE2, channel2)
+        file_str1 = self.get_file_str(TEST_FILE1)
+        file_str2 = self.get_file_str(TEST_FILE2)
         # str1 and str2 concatenation must follow alphabetical order
-        self.assertEquals(db_str, file_str1+file_str2)
+        self.assertEquals(db_str, file_str1+"\n"+file_str2)
